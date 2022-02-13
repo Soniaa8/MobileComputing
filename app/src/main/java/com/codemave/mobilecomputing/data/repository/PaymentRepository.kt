@@ -23,4 +23,17 @@ class PaymentRepository(
      * Add a new [Payment] to the payment store
      */
     suspend fun addPayment(payment: Payment) = paymentDao.insert(payment)
+
+    /**
+     * Update [Payment] to the payment store
+     */
+    suspend fun updatePayment(payment: Payment) = paymentDao.update(payment)
+
+    /**
+     * Delete [Payment] to the payment store
+     */
+    suspend fun deletePayment(payment: Payment) = paymentDao.delete(payment)
+
+    suspend fun getPaymentWithId(paymentId: Long): Payment? = paymentDao.getPaymentWithId(paymentId)
+
 }

@@ -1,10 +1,13 @@
 package com.codemave.mobilecomputing.data.entity
 
+import android.os.Parcelable
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.versionedparcelable.VersionedParcelize
+
 
 @Entity(
     tableName = "payments",

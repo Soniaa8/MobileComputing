@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.codemave.mobilecomputing.data.entity.Category
 import com.codemave.mobilecomputing.data.entity.Payment
 import kotlinx.coroutines.flow.Flow
 
@@ -18,6 +19,9 @@ abstract class PaymentDao {
     """)
     abstract fun paymentsFromCategory(categoryId: Long): Flow<List<PaymentToCategory>>
 
+    @Query("SELECT * FROM payments WHERE id = :paymentId")
+    abstract suspend fun getPaymentWithId(paymentId: Long): Payment?
+
     @Query("""SELECT * FROM payments WHERE id = :paymentId""")
     abstract fun payment(paymentId: Long): Payment?
 
@@ -25,7 +29,7 @@ abstract class PaymentDao {
     abstract suspend fun insert(entity: Payment): Long
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    abstract suspend fun update(entity: Payment)
+    abstract suspend fun update(entity: Payment) :Int
 
     @Delete
     abstract suspend fun delete(entity: Payment): Int

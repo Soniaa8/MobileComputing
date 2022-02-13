@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.codemave.mobilecomputing.R
 import com.codemave.mobilecomputing.data.entity.Category
 import com.codemave.mobilecomputing.data.entity.Payment
@@ -36,7 +37,8 @@ import java.util.*
 @Composable
 fun CategoryPayment(
     categoryId: Long,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    navController: NavController
 ) {
     val viewModel: CategoryPaymentViewModel = viewModel(
         key = "category_list_$categoryId",
@@ -46,14 +48,16 @@ fun CategoryPayment(
 
     Column(modifier = modifier) {
         PaymentList(
-            list = viewState.payments
+            list = viewState.payments,
+            navController = navController
         )
     }
 }
 
 @Composable
 private fun PaymentList(
-    list: List<PaymentToCategory>
+    list: List<PaymentToCategory>,
+    navController: NavController
 ) {
     LazyColumn(
         contentPadding = PaddingValues(0.dp),
@@ -63,7 +67,7 @@ private fun PaymentList(
             PaymentListItem(
                 payment = item.payment,
                 category = item.category,
-                onClick = {},
+                onClick = {navController.navigate("edit/${item.payment.paymentId}")},
                 modifier = Modifier.fillParentMaxWidth(),
             )
         }

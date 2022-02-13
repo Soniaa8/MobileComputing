@@ -9,7 +9,6 @@ import com.codemave.mobilecomputing.data.repository.CategoryRepository
 import com.codemave.mobilecomputing.data.repository.PaymentRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
 class PaymentViewModel(
@@ -32,6 +31,19 @@ class PaymentViewModel(
             }
         }
     }
+
+    suspend fun updatePayment(payment: Payment) :Int{
+        return paymentRepository.updatePayment(payment)
+    }
+
+    suspend fun deletePayment(payment: Payment) : Int {
+        return paymentRepository.deletePayment(payment)
+    }
+
+    suspend fun getPaymentWithId(paymentId: Long): Payment? {
+        return paymentRepository.getPaymentWithId(paymentId)
+    }
+
 }
 
 data class PaymentViewState(

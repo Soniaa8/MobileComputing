@@ -1,14 +1,8 @@
 package com.codemave.mobilecomputing.ui.payment
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.DropdownMenu
@@ -23,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
@@ -36,31 +31,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.codemave.mobilecomputing.data.entity.Category
-import com.codemave.mobilecomputing.data.entity.Payment
 import com.google.accompanist.insets.systemBarsPadding
-import java.util.*
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+
 
 @Composable
-fun Payment(
+fun Edit(
     onBackPress: () -> Unit,
+    paymentId: String,
     viewModel: PaymentViewModel = viewModel()
 ) {
+
     val viewState by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val title = rememberSaveable { mutableStateOf("") }
     val category = rememberSaveable { mutableStateOf("") }
     val date = rememberSaveable { mutableStateOf("") }
-    val location_x = rememberSaveable { mutableStateOf("") }
-    val location_y = rememberSaveable { mutableStateOf("") }
-    val creationtime =  rememberSaveable { mutableStateOf("") }
-    val reminder_seen = rememberSaveable { mutableStateOf("") }
 
     Surface {
         Column(
@@ -77,7 +64,27 @@ fun Payment(
                         contentDescription = null
                     )
                 }
-                Text(text = "Reminder")
+
+                Text(text = "Edit reminder")
+
+                Spacer(modifier = Modifier.width(150.dp))
+                IconButton(
+                    onClick = {
+                        coroutineScope.launch {
+                            val payment = viewModel.getPaymentWithId(paymentId.toLong())
+
+                            if (payment != null) {
+                                viewModel.deletePayment(payment)
+                            }
+                        }
+                        onBackPress()
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = null
+                    )
+                }
             }
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -87,7 +94,7 @@ fun Payment(
                 OutlinedTextField(
                     value = title.value,
                     onValueChange = { title.value = it },
-                    label = { Text(text = "Reminder name")},
+                    label = { Text(text = "Edit reminder name")},
                     modifier = Modifier.fillMaxWidth()
                 )
                 Spacer(modifier = Modifier.height(10.dp))
@@ -99,7 +106,7 @@ fun Payment(
                 OutlinedTextField(
                     value = date.value,
                     onValueChange = { date.value = it },
-                    label = { Text(text = "Date")},
+                    label = { Text(text = "Edit date")},
                     placeholder =  { Text(text = "yyyy-MM-dd")},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
@@ -112,14 +119,17 @@ fun Payment(
                     enabled = true,
                     onClick = {
                         coroutineScope.launch {
-                            viewModel.savePayment(
-                                com.codemave.mobilecomputing.data.entity.Payment(
+                            val payment = viewModel.getPaymentWithId(paymentId.toLong())
+                            val updatedPayment =
+                                payment?.copy(
                                     paymentTitle = title.value,
-                                    paymentAmount = 0.0, // amount.value.toDouble(),
+                                    paymentAmount = 0.0,
                                     paymentDate = date.value.toDateLong(),
                                     paymentCategoryId = getCategoryId(viewState.categories, category.value)
                                 )
-                            )
+                                if(updatedPayment != null){
+                                    viewModel.updatePayment(updatedPayment)
+                                }
                         }
                         onBackPress()
                     },
@@ -127,7 +137,7 @@ fun Payment(
                         .fillMaxWidth()
                         .size(55.dp)
                 ) {
-                    Text("Save reminder")
+                    Text("Change reminder")
                 }
             }
         }
@@ -155,7 +165,7 @@ private fun CategoryListDropdown(
             value = category.value,
             onValueChange = { category.value = it},
             modifier = Modifier.fillMaxWidth(),
-            label = { Text("Category") },
+            label = { Text("Change category") },
             readOnly = true,
             trailingIcon = {
                 Icon(
@@ -185,10 +195,3 @@ private fun CategoryListDropdown(
     }
 }
 
-internal fun String.toDateLong(): Long { //antes era private
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
-    val nDate = LocalDate.parse(this, formatter).atStartOfDay()
-    return nDate.toMillis()
-}
-
-fun LocalDateTime.toMillis(zone: ZoneId = ZoneId.systemDefault()) = atZone(zone).toInstant().toEpochMilli()

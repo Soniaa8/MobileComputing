@@ -63,7 +63,7 @@ fun HomeContent(
     categories: List<Category>,
     onCategorySelected: (Category) -> Unit,
     navController: NavController,
-    onBackPress: () -> Unit
+    onBackPress: () -> Unit,
 ) {
     Scaffold(
         modifier = Modifier.padding(bottom = 24.dp),
@@ -101,7 +101,8 @@ fun HomeContent(
 
             CategoryPayment(
                 modifier = Modifier.fillMaxSize(),
-                categoryId = selectedCategory.id
+                categoryId = selectedCategory.id,
+                navController = navController
             )
         }
     }
@@ -195,5 +196,6 @@ private fun ChoiceChipContent(
         )
     }
 }
+
 
 private val emptyTabIndicator: @Composable (List<TabPosition>) -> Unit = {}

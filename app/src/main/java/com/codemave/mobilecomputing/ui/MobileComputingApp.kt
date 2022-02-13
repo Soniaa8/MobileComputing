@@ -9,6 +9,7 @@ import com.codemave.mobilecomputing.ui.login.Help
 import com.codemave.mobilecomputing.ui.login.Help2
 import com.codemave.mobilecomputing.ui.login.Help3
 import com.codemave.mobilecomputing.ui.payment.Payment
+import com.codemave.mobilecomputing.ui.payment.Edit
 
 @Composable
 fun MobileComputingApp(
@@ -48,5 +49,11 @@ fun MobileComputingApp(
         composable(route = "payment") {
             Payment(onBackPress = appState::navigateBack)
         }
+        composable(route = "edit/{paymentId}") {
+            entry ->Edit(onBackPress = appState::navigateBack,
+            entry.arguments?.getString("paymentId")?:""
+            )
+        }
+
     }
 }
