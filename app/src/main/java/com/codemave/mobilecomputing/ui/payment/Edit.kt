@@ -34,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import com.codemave.mobilecomputing.data.entity.Category
 import com.google.accompanist.insets.systemBarsPadding
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 @Composable
@@ -48,6 +50,7 @@ fun Edit(
     val title = rememberSaveable { mutableStateOf("") }
     val category = rememberSaveable { mutableStateOf("") }
     val date = rememberSaveable { mutableStateOf("") }
+    val notifications = rememberSaveable { mutableStateOf("") }
 
     Surface {
         Column(
@@ -107,13 +110,27 @@ fun Edit(
                     value = date.value,
                     onValueChange = { date.value = it },
                     label = { Text(text = "Edit date")},
-                    placeholder =  { Text(text = "yyyy-MM-dd")},
+                    placeholder =  { Text(text = "yyyy-MM-dd--hh-mm")},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
                     )
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-
+                OutlinedTextField(
+                    value = notifications.value,
+                    onValueChange = { notifications.value = it },
+                    label = { Text(text = "Edit number of Notifications")},
+                    placeholder =  { Text(text = "0-1-2")},
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    )
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                val dateformat = SimpleDateFormat("yyyy-MM-dd--hh-mm")
+                //var booleanDateReminder = false
+                //if (dateformat.parse(date.value).getTime() <= Date().time){
+                //    booleanDateReminder = true
+                //}
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     enabled = true,
@@ -124,8 +141,10 @@ fun Edit(
                                 payment?.copy(
                                     paymentTitle = title.value,
                                     paymentAmount = 0.0,
-                                    paymentDate = date.value.toDateLong(),
-                                    paymentCategoryId = getCategoryId(viewState.categories, category.value)
+                                    paymentDate = dateformat.parse(date.value).getTime(),
+                                    paymentCategoryId = getCategoryId(viewState.categories, category.value),
+                                    paymentActive = false,
+                                    paymentHowManyNotifications = notifications.value.toInt()
                                 )
                                 if(updatedPayment != null){
                                     viewModel.updatePayment(updatedPayment)

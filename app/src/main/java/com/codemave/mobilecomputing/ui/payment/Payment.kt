@@ -38,14 +38,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.codemave.mobilecomputing.data.entity.Category
-import com.codemave.mobilecomputing.data.entity.Payment
 import com.google.accompanist.insets.systemBarsPadding
-import java.util.*
 import kotlinx.coroutines.launch
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+
 
 @Composable
 fun Payment(
@@ -57,6 +53,7 @@ fun Payment(
     val title = rememberSaveable { mutableStateOf("") }
     val category = rememberSaveable { mutableStateOf("") }
     val date = rememberSaveable { mutableStateOf("") }
+    val notifications = rememberSaveable { mutableStateOf("") }
     val location_x = rememberSaveable { mutableStateOf("") }
     val location_y = rememberSaveable { mutableStateOf("") }
     val creationtime =  rememberSaveable { mutableStateOf("") }
@@ -100,13 +97,23 @@ fun Payment(
                     value = date.value,
                     onValueChange = { date.value = it },
                     label = { Text(text = "Date")},
-                    placeholder =  { Text(text = "yyyy-MM-dd")},
+                    placeholder =  { Text(text = "yyyy-MM-dd--hh-mm")},
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Number
                     )
                 )
                 Spacer(modifier = Modifier.height(10.dp))
-
+                OutlinedTextField(
+                    value = notifications.value,
+                    onValueChange = { notifications.value = it },
+                    label = { Text(text = "Number of Notifications")},
+                    placeholder =  { Text(text = "0-1-2")},
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number
+                    )
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                val dateformat = SimpleDateFormat("yyyy-MM-dd--hh-mm")
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     enabled = true,
@@ -116,8 +123,10 @@ fun Payment(
                                 com.codemave.mobilecomputing.data.entity.Payment(
                                     paymentTitle = title.value,
                                     paymentAmount = 0.0, // amount.value.toDouble(),
-                                    paymentDate = date.value.toDateLong(),
-                                    paymentCategoryId = getCategoryId(viewState.categories, category.value)
+                                    paymentDate = dateformat.parse(date.value).getTime(),
+                                    paymentCategoryId = getCategoryId(viewState.categories, category.value),
+                                    paymentActive = false,
+                                    paymentHowManyNotifications = notifications.value.toInt()
                                 )
                             )
                         }
@@ -185,10 +194,13 @@ private fun CategoryListDropdown(
     }
 }
 
-internal fun String.toDateLong(): Long { //antes era private
-    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd", Locale.getDefault())
-    val nDate = LocalDate.parse(this, formatter).atStartOfDay()
-    return nDate.toMillis()
-}
+//internal fun String.toDateLong(): Long { //antes era private
+//    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd--hh-mm", Locale.getDefault())
+//    //val nDate = LocalDate.parse(this, formatter).atStartOfDay() //.atTime(9, 0)
+//    //return nDate.toMillis()
+//    return formatter.toMillis()
+//}
+//
+//fun toMillis()
 
-fun LocalDateTime.toMillis(zone: ZoneId = ZoneId.systemDefault()) = atZone(zone).toInstant().toEpochMilli()
+//fun LocalDateTime.toMillis(zone: ZoneId = ZoneId.systemDefault()) = atZone(zone).toInstant().toEpochMilli()

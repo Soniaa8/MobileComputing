@@ -172,8 +172,8 @@ private fun Date.formatToString(): String {
     return SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(this)
 }
 
-private fun Long.toDateString(): String {
-    return SimpleDateFormat("MMMM dd, yyyy", Locale.getDefault()).format(Date(this))
+fun Long.toDateString(): String {
+    return SimpleDateFormat("MMMM dd, yyyy, hh:mm", Locale.getDefault()).format(Date(this))
 
 }
 

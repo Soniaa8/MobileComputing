@@ -8,11 +8,13 @@ import com.codemave.mobilecomputing.data.room.PaymentToCategory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.*
 
 
 class CategoryPaymentViewModel(
     private val categoryId: Long,
     private val paymentRepository: PaymentRepository = Graph.paymentRepository
+
 ) : ViewModel() {
     private val _state = MutableStateFlow(CategoryPaymentViewState())
 
@@ -22,8 +24,15 @@ class CategoryPaymentViewModel(
     init {
         viewModelScope.launch {
             paymentRepository.paymentsInCategory(categoryId).collect { list ->
+                val beforeTimeReminder= list.filter {
+                    if (it.payment.paymentDate <= Date().time) {
+                        paymentRepository.updatePayment(it.payment.copy(paymentActive = true))
+                    }
+                    it.payment.paymentActive
+                }
+
                 _state.value = CategoryPaymentViewState(
-                    payments = list
+                    payments = beforeTimeReminder
                 )
             }
         }
