@@ -33,5 +33,9 @@ data class Payment(
     @ColumnInfo(name = "payment_category_id") val paymentCategoryId: Long,
     @ColumnInfo(name = "payment_amount") val paymentAmount: Double,
     @ColumnInfo(name = "payment_active") val paymentActive: Boolean,
-    @ColumnInfo(name = "payment_notifications") val paymentHowManyNotifications: Int
+    @ColumnInfo(name = "payment_notifications") val paymentHowManyNotifications: Int,
+    @ColumnInfo(name = "payment_locationX") val paymentLocationX: Double,
+    @ColumnInfo(name = "payment_locationY") val paymentLocationY: Double,
+    @ColumnInfo(name = "payment_flocationX") val locationX: Double,
+    @ColumnInfo(name = "payment_flocationY") val locationY: Double
 )

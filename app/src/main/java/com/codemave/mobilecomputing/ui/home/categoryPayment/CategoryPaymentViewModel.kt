@@ -25,7 +25,9 @@ class CategoryPaymentViewModel(
         viewModelScope.launch {
             paymentRepository.paymentsInCategory(categoryId).collect { list ->
                 val beforeTimeReminder= list.filter {
-                    if (it.payment.paymentDate <= Date().time) {
+                    if (it.payment.paymentDate <= Date().time ||
+                        Math.abs(it.payment.locationX - it.payment.paymentLocationX) < 0.1
+                        && Math.abs(it.payment.locationY - it.payment.paymentLocationY) < 0.1) {
                         paymentRepository.updatePayment(it.payment.copy(paymentActive = true))
                     }
                     it.payment.paymentActive

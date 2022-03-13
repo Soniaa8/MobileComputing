@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import com.codemave.mobilecomputing.R
 import com.codemave.mobilecomputing.ui.home.categoryPayment.toDateString
+import java.lang.Math.abs
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -76,24 +77,46 @@ private fun setOneTimeNotification(payment: Payment) {
         .setRequiredNetworkType(NetworkType.CONNECTED)
         .build()
 
-    val notificationWorker = OneTimeWorkRequestBuilder<NotificationWorker>()
-        .setInitialDelay(payment.paymentDate - Date().time, TimeUnit.MILLISECONDS)
-        //.setInitialDelay(10, TimeUnit.SECONDS)
-        .setConstraints(constraints)
-        .build()
+    if(payment.paymentLocationX != 0.0){
+        if(abs(payment.locationX - payment.paymentLocationX) < 0.1 && abs(payment.locationY - payment.paymentLocationY) < 0.1) {
+            val notificationWorker = OneTimeWorkRequestBuilder<NotificationWorker>()
+                //.setInitialDelay(1, TimeUnit.SECONDS)
+                .setConstraints(constraints)
+                .build()
+            workManager.enqueue(notificationWorker)
 
-    workManager.enqueue(notificationWorker)
-
-    //Monitoring for state of work
-    workManager.getWorkInfoByIdLiveData(notificationWorker.id).observeForever { workInfo ->
-        if (workInfo.state == WorkInfo.State.SUCCEEDED) {
-            createSuccessNotification(payment, 1)
-            //si queremos que al updatear se modifique
-            // igual hay que pasarle el id de la notificacion
-        } else {
-            //createErrorNotification()
+            //Monitoring for state of work
+            workManager.getWorkInfoByIdLiveData(notificationWorker.id).observeForever { workInfo ->
+                if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                    createSuccessNotification(payment, 1)
+                    //si queremos que al updatear se modifique igual hay que pasarle el id de la notificacion
+                } else {
+                    //createErrorNotification()
+                }
+            }
         }
     }
+    else{
+        val notificationWorker = OneTimeWorkRequestBuilder<NotificationWorker>()
+            .setInitialDelay(payment.paymentDate - Date().time, TimeUnit.MILLISECONDS)
+            //.setInitialDelay(10, TimeUnit.SECONDS)
+            .setConstraints(constraints)
+            .build()
+        workManager.enqueue(notificationWorker)
+
+        //Monitoring for state of work
+        workManager.getWorkInfoByIdLiveData(notificationWorker.id).observeForever { workInfo ->
+            if (workInfo.state == WorkInfo.State.SUCCEEDED) {
+                createSuccessNotification(payment, 1)
+                //si queremos que al updatear se modifique
+                // igual hay que pasarle el id de la notificacion
+            } else {
+                //createErrorNotification()
+            }
+        }
+    }
+
+
     if (payment.paymentHowManyNotifications > 1){
         val workManager = WorkManager.getInstance(Graph.appContext)
         val constraints = Constraints.Builder()

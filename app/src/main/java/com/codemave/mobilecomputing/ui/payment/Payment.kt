@@ -1,25 +1,11 @@
 package com.codemave.mobilecomputing.ui.payment
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddLocation
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
@@ -37,8 +23,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.codemave.mobilecomputing.data.entity.Category
 import com.google.accompanist.insets.systemBarsPadding
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 
@@ -46,7 +34,8 @@ import java.text.SimpleDateFormat
 @Composable
 fun Payment(
     onBackPress: () -> Unit,
-    viewModel: PaymentViewModel = viewModel()
+    viewModel: PaymentViewModel = viewModel(),
+    navController: NavController
 ) {
     val viewState by viewModel.state.collectAsState()
     val coroutineScope = rememberCoroutineScope()
@@ -54,10 +43,18 @@ fun Payment(
     val category = rememberSaveable { mutableStateOf("") }
     val date = rememberSaveable { mutableStateOf("") }
     val notifications = rememberSaveable { mutableStateOf("") }
-    val location_x = rememberSaveable { mutableStateOf("") }
-    val location_y = rememberSaveable { mutableStateOf("") }
-    val creationtime =  rememberSaveable { mutableStateOf("") }
-    val reminder_seen = rememberSaveable { mutableStateOf("") }
+    val latlng = navController
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.getLiveData<LatLng>("location_data")
+        ?.value
+
+    val flatlng = navController
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.getLiveData<LatLng>("flocation_data")
+        ?.value
+
 
     Surface {
         Column(
@@ -75,6 +72,18 @@ fun Payment(
                     )
                 }
                 Text(text = "Reminder")
+                Spacer(modifier = Modifier.width(180.dp))
+                IconButton(
+                    onClick = {
+                        navController.navigate("mapF")
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.AddLocation,
+                        contentDescription = null
+                    )
+                }
+
             }
             Column(
                 horizontalAlignment = Alignment.Start,
@@ -113,22 +122,57 @@ fun Payment(
                     )
                 )
                 Spacer(modifier = Modifier.height(10.dp))
+                if (latlng == null) {
+                    OutlinedButton(
+                        onClick = { navController.navigate("map") },
+                        modifier = Modifier.height(55.dp)
+                    ) {
+                        Text(text = "Reminder location")
+                    }
+                } else {
+                    Text(
+                        text = "Lat: ${latlng.latitude}, \nLng: ${latlng.longitude}"
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
                 val dateformat = SimpleDateFormat("yyyy-MM-dd--hh-mm")
                 Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     enabled = true,
                     onClick = {
                         coroutineScope.launch {
-                            viewModel.savePayment(
-                                com.codemave.mobilecomputing.data.entity.Payment(
-                                    paymentTitle = title.value,
-                                    paymentAmount = 0.0, // amount.value.toDouble(),
-                                    paymentDate = dateformat.parse(date.value).getTime(),
-                                    paymentCategoryId = getCategoryId(viewState.categories, category.value),
-                                    paymentActive = false,
-                                    paymentHowManyNotifications = notifications.value.toInt()
+                            if (latlng != null && flatlng != null) {
+                                viewModel.savePayment(
+                                    com.codemave.mobilecomputing.data.entity.Payment(
+                                        paymentTitle = title.value,
+                                        paymentAmount = 0.0, // amount.value.toDouble(),
+                                        paymentDate = dateformat.parse(date.value).getTime(),
+                                        paymentCategoryId = getCategoryId(viewState.categories, category.value),
+                                        paymentActive = false,
+                                        paymentHowManyNotifications = notifications.value.toInt(),
+                                        paymentLocationX = latlng.latitude,
+                                        paymentLocationY = latlng.longitude,
+                                        locationX = flatlng.latitude,
+                                        locationY = flatlng.longitude
+                                    )
                                 )
-                            )
+                            }
+                            else{
+                                viewModel.savePayment(
+                                    com.codemave.mobilecomputing.data.entity.Payment(
+                                        paymentTitle = title.value,
+                                        paymentAmount = 0.0, // amount.value.toDouble(),
+                                        paymentDate = dateformat.parse(date.value).getTime(),
+                                        paymentCategoryId = getCategoryId(viewState.categories, category.value),
+                                        paymentActive = false,
+                                        paymentHowManyNotifications = notifications.value.toInt(),
+                                        paymentLocationX = 0.0,
+                                        paymentLocationY = 0.0,
+                                        locationX= 100.0,
+                                        locationY= 100.0
+                                    )
+                                )
+                            }
                         }
                         onBackPress()
                     },

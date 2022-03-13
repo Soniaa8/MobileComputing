@@ -8,8 +8,11 @@ import com.codemave.mobilecomputing.ui.login.Login
 import com.codemave.mobilecomputing.ui.login.Help
 import com.codemave.mobilecomputing.ui.login.Help2
 import com.codemave.mobilecomputing.ui.login.Help3
+import com.codemave.mobilecomputing.ui.maps.PaymentLocationMap
+import com.codemave.mobilecomputing.ui.maps.PaymentLocationMapF
 import com.codemave.mobilecomputing.ui.payment.Payment
 import com.codemave.mobilecomputing.ui.payment.Edit
+import com.codemave.mobilecomputing.ui.payment.PaymentViewModel
 
 @Composable
 fun MobileComputingApp(
@@ -47,13 +50,19 @@ fun MobileComputingApp(
             )
         }
         composable(route = "payment") {
-            Payment(onBackPress = appState::navigateBack)
+            Payment(onBackPress = appState::navigateBack, navController = appState.navController)
+        }
+        composable(route = "map") {
+            PaymentLocationMap(navController = appState.navController)
+        }
+        composable(route = "mapF") {
+            PaymentLocationMapF(navController = appState.navController)
         }
         composable(route = "edit/{paymentId}") {
             entry ->Edit(onBackPress = appState::navigateBack,
-            entry.arguments?.getString("paymentId")?:""
+            entry.arguments?.getString("paymentId")?:"",
+             navController = appState.navController
             )
         }
-
     }
 }

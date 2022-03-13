@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
@@ -31,6 +32,7 @@ import com.codemave.mobilecomputing.R
 import com.codemave.mobilecomputing.data.entity.Category
 import com.codemave.mobilecomputing.ui.home.categoryPayment.CategoryPayment
 import com.google.accompanist.insets.systemBarsPadding
+import com.google.android.gms.maps.model.LatLng
 import java.util.*
 
 @Composable
@@ -112,9 +114,9 @@ fun HomeContent(
 @Composable
 private fun HomeAppBar(
     backgroundColor: Color,
-    onBackPress: () -> Unit
-
+    onBackPress: () -> Unit,
 ) {
+
     TopAppBar(
         title = {
             Text(
@@ -127,7 +129,7 @@ private fun HomeAppBar(
         },
         backgroundColor = backgroundColor,
         actions = {
-            IconButton( onClick = {} ) {
+            IconButton( onClick = {}) {
                 Icon(imageVector = Icons.Filled.Search, contentDescription = stringResource(R.string.search))
             }
             IconButton( onClick = {} ) {

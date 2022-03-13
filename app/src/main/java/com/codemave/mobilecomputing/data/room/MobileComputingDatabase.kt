@@ -10,7 +10,7 @@ import com.codemave.mobilecomputing.data.entity.Payment
  */
 @Database(
     entities = [Category::class, Payment::class],
-    version = 5,
+    version = 8,
     exportSchema = false
 )
 abstract class MobileComputingDatabase : RoomDatabase() {

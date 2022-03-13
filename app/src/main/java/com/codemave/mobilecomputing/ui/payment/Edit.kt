@@ -4,15 +4,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
@@ -31,8 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.codemave.mobilecomputing.data.entity.Category
 import com.google.accompanist.insets.systemBarsPadding
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -42,7 +36,8 @@ import java.util.*
 fun Edit(
     onBackPress: () -> Unit,
     paymentId: String,
-    viewModel: PaymentViewModel = viewModel()
+    viewModel: PaymentViewModel = viewModel(),
+    navController: NavController
 ) {
 
     val viewState by viewModel.state.collectAsState()
@@ -51,6 +46,11 @@ fun Edit(
     val category = rememberSaveable { mutableStateOf("") }
     val date = rememberSaveable { mutableStateOf("") }
     val notifications = rememberSaveable { mutableStateOf("") }
+    val latlng = navController
+        .currentBackStackEntry
+        ?.savedStateHandle
+        ?.getLiveData<LatLng>("location_data")
+        ?.value
 
     Surface {
         Column(
@@ -126,6 +126,19 @@ fun Edit(
                     )
                 )
                 Spacer(modifier = Modifier.height(10.dp))
+                if (latlng == null) {
+                    OutlinedButton(
+                        onClick = { navController.navigate("map") },
+                        modifier = Modifier.height(55.dp)
+                    ) {
+                        Text(text = "Reminder location")
+                    }
+                } else {
+                    Text(
+                        text = "Lat: ${latlng.latitude}, \nLng: ${latlng.longitude}"
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
                 val dateformat = SimpleDateFormat("yyyy-MM-dd--hh-mm")
                 //var booleanDateReminder = false
                 //if (dateformat.parse(date.value).getTime() <= Date().time){
@@ -137,18 +150,48 @@ fun Edit(
                     onClick = {
                         coroutineScope.launch {
                             val payment = viewModel.getPaymentWithId(paymentId.toLong())
-                            val updatedPayment =
-                                payment?.copy(
-                                    paymentTitle = title.value,
-                                    paymentAmount = 0.0,
-                                    paymentDate = dateformat.parse(date.value).getTime(),
-                                    paymentCategoryId = getCategoryId(viewState.categories, category.value),
-                                    paymentActive = false,
-                                    paymentHowManyNotifications = notifications.value.toInt()
-                                )
-                                if(updatedPayment != null){
+                            if (latlng == null) {
+                                val updatedPayment =
+                                    payment?.copy(
+                                        paymentTitle = title.value,
+                                        paymentAmount = 0.0,
+                                        paymentDate = dateformat.parse(date.value).getTime(),
+                                        paymentCategoryId = getCategoryId(
+                                            viewState.categories,
+                                            category.value
+                                        ),
+                                        paymentActive = false,
+                                        paymentHowManyNotifications = notifications.value.toInt(),
+                                        paymentLocationX = 0.0,
+                                        paymentLocationY = 0.0,
+                                        locationX = 0.0,
+                                        locationY = 0.0
+                                    )
+                                if (updatedPayment != null) {
                                     viewModel.updatePayment(updatedPayment)
                                 }
+                            }
+                            else {
+                                val updatedPayment =
+                                    payment?.copy(
+                                        paymentTitle = title.value,
+                                        paymentAmount = 0.0,
+                                        paymentDate = dateformat.parse(date.value).getTime(),
+                                        paymentCategoryId = getCategoryId(
+                                            viewState.categories,
+                                            category.value
+                                        ),
+                                        paymentActive = false,
+                                        paymentHowManyNotifications = notifications.value.toInt(),
+                                        paymentLocationX = 0.0,
+                                        paymentLocationY = 0.0,
+                                        locationX = 0.0,
+                                        locationY = 0.0
+                                    )
+                                if (updatedPayment != null) {
+                                    viewModel.updatePayment(updatedPayment)
+                                }
+                            }
                         }
                         onBackPress()
                     },
